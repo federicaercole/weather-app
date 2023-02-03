@@ -1,7 +1,16 @@
 const temperature = document.querySelector(".temperature");
 const weather = document.querySelector(".weather");
 
-//fahrenheit
+const button = document.querySelector("button");
+button.addEventListener("click", getWeatherData);
+
+let temperatureUnit = "celsius";
+const option = document.querySelector("select");
+
+option.addEventListener("change", () => {
+    temperatureUnit = option.value;
+})
+
 async function getWeatherData() {
     try {
         const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=44.39&longitude=7.55&current_weather=true&timezone=auto&temperature_unit=${temperatureUnit}`, { mode: 'cors' });
@@ -13,11 +22,9 @@ async function getWeatherData() {
     }
 }
 
-getWeatherData();
-
 function printValues(json) {
-    // const temperatureUnit =
-    temperature.textContent = json.current_weather.temperature;
+    const unitSymbol = temperatureUnit === "celsius" ? "°C" : "°F";
+    temperature.textContent = `${json.current_weather.temperature} ${unitSymbol}`;
     const weatherCode = json.current_weather.weathercode;
     switchWeatherConditions(weatherCode);
 }
@@ -110,10 +117,3 @@ function switchWeatherConditions(weatherCode) {
             break;
     }
 }
-
-
-
-//City
-//temperature
-//toggle per C o F
-//weathercode (per cambiare l'immagine di sfondo)

@@ -12,6 +12,17 @@
 <body>
     <main>
         <div class="weather-data">
+            <label for="search">Search</label>
+            <input type="text" id="search">
+            <div>
+                <label for="temperature-unit">Temperature Unit</label>
+                <select id="temperature-unit" name="temperature-unit">
+                    <option value="celsius">Celsius</option>
+                    <option value="fahrenheit">Fahrenheit</option>
+                </select>
+            </div>
+            <button type="button">Submit</button>
+
             <h2>City</h2>
             <p class="temperature"></p>
             <p class="weather"></p>
