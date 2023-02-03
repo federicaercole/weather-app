@@ -1,15 +1,25 @@
 const temperature = document.querySelector(".temperature");
 const weather = document.querySelector(".weather");
+const body = document.querySelector("body");
+const errorMsg = document.querySelector(".error");
 
 const button = document.querySelector("button");
 button.addEventListener("click", getWeatherData);
 
 let temperatureUnit = "celsius";
-const option = document.querySelector("select");
 
-option.addEventListener("change", () => {
-    temperatureUnit = option.value;
-})
+const unitSelection = [...document.querySelectorAll('input[type="radio"]')];
+
+unitSelection.map(item => item.addEventListener("click", event => {
+    resetRadioButtons();
+    event.target.checked = true;
+    temperatureUnit = event.target.value;
+    getWeatherData();
+}));
+
+function resetRadioButtons() {
+    unitSelection.forEach(item => item.checked = false);
+}
 
 async function getWeatherData() {
     try {
@@ -18,102 +28,83 @@ async function getWeatherData() {
         console.log(jsonData);
         printValues(jsonData);
     } catch (error) {
-        console.log("Nothing found");
+        errorMsg.classList.remove("hidden");
+        errorMsg.textContents = "Ooops, something went wrong!";
     }
 }
 
 function printValues(json) {
     const unitSymbol = temperatureUnit === "celsius" ? "°C" : "°F";
-    temperature.textContent = `${json.current_weather.temperature} ${unitSymbol}`;
+    temperature.textContent = `${json.current_weather.temperature}${unitSymbol}`;
     const weatherCode = json.current_weather.weathercode;
+    const time = Number(json.current_weather.time.split('T')[1].split(":")[0]);
     switchWeatherConditions(weatherCode);
+    switchTimeConditions(time);
+}
+
+function switchTimeConditions(time) {
+    if (time <= 6 && time >= 18) {
+        body.setAttribute("night");
+    }
 }
 
 function switchWeatherConditions(weatherCode) {
     switch (weatherCode) {
         case 0:
             weather.textContent = "Clear sky";
+            body.setAttribute("class", "clear")
             break;
         case 1:
             weather.textContent = "Mainly clear";
             break;
         case 2:
-            weather.textContent = "Partly cloudy";
-            break;
         case 3:
-            weather.textContent = "Overcast";
+            weather.textContent = "Cloudy";
             break;
         case 45:
+        case 48:
             weather.textContent = "Fog";
             break;
-        case 48:
-            weather.textContent = "Depositing rime fog";
-            break;
         case 51:
-            weather.textContent = "Light intensity drizzle";
-            break;
         case 53:
-            weather.textContent = "Moderate intensity rizzle";
-            break;
         case 55:
-            weather.textContent = "Dense intensity drizzle";
-            break;
         case 56:
-            weather.textContent = "Light intensity freezing drizzle";
-            break;
         case 57:
-            weather.textContent = "Dense intensity freezing drizzle";
+            weather.textContent = "Drizzle";
             break;
         case 61:
-            weather.textContent = "Slight intensity rain";
-            break;
         case 63:
-            weather.textContent = "Moderate intensity rain";
-            break;
         case 65:
-            weather.textContent = "Heavy intensity rain";
-            break;
-        case 61:
-            weather.textContent = "Light intensity freezing rain";
-            break;
+        case 66:
         case 67:
-            weather.textContent = "Heavy intensity freezing rain";
+            weather.textContent = "Rain";
             break;
         case 71:
-            weather.textContent = "Slight intensity snow fall";
-            break;
         case 73:
-            weather.textContent = "Moderate intensity snow fall";
-            break;
         case 75:
-            weather.textContent = "Heavy intensity snow fall";
+            weather.textContent = "Snow fall";
             break;
         case 77:
             weather.textContent = "Snow grains";
             break;
         case 80:
-            weather.textContent = "Slight rain shower";
-            break;
         case 81:
-            weather.textContent = "Moderate rain shower";
-            break;
         case 82:
-            weather.textContent = "Violent rain shower";
+            weather.textContent = "Rain shower";
             break;
         case 85:
-            weather.textContent = "Slight snow shower";
-            break;
         case 86:
-            weather.textContent = "Heavy snow shower";
+            weather.textContent = "Snow shower";
             break;
         case 95:
             weather.textContent = "Thunderstorm";
             break;
         case 96:
-            weather.textContent = "Thunderstorm with slight hail";
-            break;
         case 99:
-            weather.textContent = "Thunderstorm with heavy hail";
+            weather.textContent = "Thunderstorm with hail";
             break;
     }
 }
+
+resetRadioButtons();
+unitSelection[0].checked = true;
