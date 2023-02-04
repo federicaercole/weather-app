@@ -1,16 +1,45 @@
 //App
 let temperatureUnit = "celsius";
+let latitude = "";
+let longitude = "";
+let locationName = "";
+let country = "";
+const errorMsg = document.querySelector(".error");
 
-async function getWeatherData() {
+async function getSearchResults(location) {
     try {
-        const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=44.39&longitude=7.55&current_weather=true&timezone=auto&temperature_unit=${temperatureUnit}`, { mode: 'cors' });
+        const response = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${location}`, { mode: 'cors' });
         const jsonData = await response.json();
         console.log(jsonData);
-        printValues(jsonData);
+        latitude = jsonData.results[0].latitude;
+        longitude = jsonData.results[0].longitude;
+        locationName = jsonData.results[0].name;
+        country = jsonData.results[0].country;
+        getWeatherData(latitude, longitude, locationName, country);
     } catch (error) {
-        errorMsg.classList.remove("hidden");
-        errorMsg.textContents = "Ooops, something went wrong!";
+        showErrors();
     }
+}
+
+async function getWeatherData(latitude, longitude, locationName, country) {
+    try {
+        const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&timezone=auto&temperature_unit=${temperatureUnit}`, { mode: 'cors' });
+        const jsonData = await response.json();
+        console.log(jsonData);
+        printValues(jsonData, locationName, country);
+    } catch (error) {
+        showErrors();
+    }
+}
+
+function showErrors() {
+    errorMsg.classList.remove("hidden");
+    errorMsg.textContent = "Ooops, something went wrong!";
+}
+
+function resetErrors() {
+    errorMsg.classList.add("hidden");
+    errorMsg.textContent = "";
 }
 
 const unitSelection = [...document.querySelectorAll('input[type="radio"]')];
@@ -19,19 +48,26 @@ unitSelection.map(item => item.addEventListener("click", event => {
     resetRadioButtons();
     event.target.checked = true;
     temperatureUnit = event.target.value;
-    getWeatherData();
+    getWeatherData(latitude, longitude, locationName);
 }));
 
+const input = document.querySelector('input[type="text"]');
+
 const button = document.querySelector("button");
-button.addEventListener("click", getWeatherData);
+button.addEventListener("click", event => {
+    resetErrors();
+    getSearchResults(input.value);
+    input.value = "";
+});
 
 //UI
 const body = document.querySelector("body");
-const errorMsg = document.querySelector(".error");
 const temperature = document.querySelector(".temperature");
 const weather = document.querySelector(".weather");
 
-function printValues(json) {
+function printValues(json, locationName) {
+    const h2 = document.querySelector("h2");
+    h2.textContent = `${locationName}, ${country}`;
     const unitSymbol = temperatureUnit === "celsius" ? "°C" : "°F";
     temperature.textContent = `${json.current_weather.temperature}${unitSymbol}`;
     const weatherCode = json.current_weather.weathercode;

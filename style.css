@@ -119,6 +119,7 @@ h2 {
     background-color: rgb(192, 17, 17);
     border-radius: 10px;
     padding: 10px;
+    color: white;
 }
 
 .hidden {
@@ -204,13 +205,27 @@ footer a:active {
 
 .cloudy {
     background: rgb(70, 79, 97);
-    background: linear-gradient(0deg, rgba(70, 79, 97, 1) 0%, rgba(75, 144, 186, 1) 100%);
+    background: linear-gradient(0deg, #464f61 0%, #4b90ba 100%);
+}
+
+.cloudy.night {
+    background: rgb(36, 38, 42);
+    background: linear-gradient(0deg, rgba(36, 38, 42, 1) 0%, rgba(35, 67, 87, 1) 100%);
+}
+
+.cloudy.night .data::before {
+    background-image: url("./images/cloud-night.svg");
 }
 
 .fog {
     background: rgb(176, 185, 204);
     background: linear-gradient(0deg, rgba(176, 185, 204, 1) 0%, rgba(201, 234, 255, 1) 100%);
 }
+
+/* stile light-rain night */
+/* stile fog night */
+/* stile rain night */
+/* stile snow night */
 
 .light-rain {
     background: rgb(90, 108, 120);
