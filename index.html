@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 
-<body>
+<body class="clear">
     <h1>Weather App</h1>
     <main>
         <div class="search">
@@ -25,8 +25,9 @@
 
                 <span class="visually-hidden">Search</span></button>
             <div class="error hidden" aria-live="polite"></div>
+            <div class="loader hidden"></div>
         </div>
-        <div class="weather-data">
+        <div class="weather-data hidden">
             <h2>City</h2>
             <div class="unit">
                 <input id="celsius" type="radio" value="celsius">
@@ -35,8 +36,8 @@
                 <label for="fahrenheit">Fahrenheit</label>
             </div>
             <div class="data">
-                <p class="temperature">10°C</p>
-                <p class="weather">Clear Sky</p>
+                <p class="temperature">Temperature</p>
+                <p class="weather">Weather</p>
             </div>
         </div>
     </main>

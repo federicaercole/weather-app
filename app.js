@@ -2,6 +2,8 @@ const app = (function () {
     let temperatureUnit = "celsius";
 
     async function getSearchResult(location) {
+        const loader = document.querySelector(".loader");
+        loader.classList.remove("hidden");
         try {
             const response = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${location}`, { mode: 'cors' });
             const jsonData = await response.json();
@@ -13,21 +15,27 @@ const app = (function () {
         } catch {
             ui.showErrors();
             ui.errorMsg.textContent = "The location doesn't exist or you typed it wrong. Please retry.";
+        } finally {
+            loader.classList.add("hidden");
         }
     }
 
     async function getWeatherData(latitude, longitude, locationName, country) {
+        const loader = document.querySelector(".loader");
+        loader.classList.remove("hidden");
         try {
             const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&timezone=auto&temperature_unit=${temperatureUnit}`, { mode: 'cors' });
             const jsonData = await response.json();
-            const temperature = jsonData.current_weather.temperature;
+            const currentTemperature = jsonData.current_weather.temperature;
             const weatherCode = jsonData.current_weather.weathercode;
             const time = Number(jsonData.current_weather.time.split('T')[1].split(":")[0]);
-            ui.printValues(temperature, temperatureUnit, weatherCode, time, locationName, country);
+            ui.printValues(currentTemperature, temperatureUnit, weatherCode, time, locationName, country);
         }
         catch {
             ui.showErrors();
             ui.errorMsg.textContent = "Weather is not available!"
+        } finally {
+            loader.classList.add("hidden");
         }
     }
 
@@ -61,6 +69,7 @@ const app = (function () {
 
     function search(event) {
         ui.resetErrors();
+        ui.weatherData.classList.add("hidden");
         if (input.validity.valueMissing) {
             ui.showErrors();
             event.preventDefault();
@@ -78,6 +87,7 @@ const ui = (function () {
     const temperature = document.querySelector(".temperature");
     const weather = document.querySelector(".weather");
     const errorMsg = document.querySelector(".error");
+    const weatherData = document.querySelector(".weather-data")
 
     function printTemperature(degree, temperatureUnit) {
         let unitSymbol;
@@ -91,6 +101,7 @@ const ui = (function () {
         printTemperature(temperature, temperatureUnit);
         switchWeatherClass(weatherCode);
         switchTimeClass(time);
+        ui.weatherData.classList.remove("hidden");
     }
 
     function switchWeatherClass(weatherCode) {
@@ -183,7 +194,7 @@ const ui = (function () {
         errorMsg.textContent = "";
     }
 
-    return { printValues, printTemperature, showErrors, resetErrors, errorMsg, temperature }
+    return { printValues, printTemperature, showErrors, resetErrors, errorMsg, temperature, weatherData }
 })();
 
 function resetRadioButtons() {
@@ -202,4 +213,38 @@ const convertToFahrenheit = function (degree) {
 
 resetRadioButtons();
 app.unitSelection[0].checked = true;
-app.getWeatherData(45, 7.68, "Turin", "Italy");
+
+        // weatherData.appendChild(h2);
+
+        // const unitDiv = document.createElement("div");
+        // const celsiusInput = document.createElement("input");
+        // celsiusInput.id = "celsius";
+        // celsiusInput.type = "radio";
+        // celsiusInput.value = "celsius";
+        // const celsiusLabel = document.createElement("label");
+        // celsiusLabel.setAttribute("for", "celsius");
+        // celsiusLabel.textContent = "Celsius";
+
+        // const farInput = document.createElement("input");
+        // farInput.id = "fahrenheit";
+        // farInput.type = "radio";
+        // farInput.value = "fahrenheit";
+        // const farLabel = document.createElement("label");
+        // farLabel.setAttribute("for", "fahrenheit");
+        // farLabel.textContent = "Fahrenheit";
+
+        // weatherData.appendChild(unitDiv);
+        // unitDiv.appendChild(celsiusInput);
+        // unitDiv.appendChild(celsiusLabel);
+        // unitDiv.appendChild(farInput);
+        // unitDiv.appendChild(farLabel);
+
+        // const dataDiv = document.createElement("div");
+        // const paraTemp = document.createElement("p");
+        // paraTemp.classList.add("temperature");
+        // const paraWeather = document.createElement("p");
+        // paraTemp.classList.add("weather");
+
+        // weatherData.appendChild(dataDiv);
+        // dataDiv.appendChild(paraTemp);
+        // dataDiv.appendChild(paraWeather);
