@@ -48,17 +48,27 @@ const app = (function () {
 
     const input = document.querySelector('input[type="text"]');
 
+    input.addEventListener("keydown", event => {
+        if (event.key === "Enter") {
+            search(event);
+        }
+    })
+
     const button = document.querySelector("button");
-    button.addEventListener("click", event => {
+    button.addEventListener("click", (event) => {
+        search(event);
+    });
+
+    function search(event) {
         ui.resetErrors();
         if (input.validity.valueMissing) {
             ui.showErrors();
             event.preventDefault();
         } else {
-            getSearchResult(input.value)
+            getSearchResult(input.value);
             input.value = "";
         }
-    });
+    }
 
     return { unitSelection, temperatureUnit, input, getWeatherData };
 })();
@@ -192,4 +202,4 @@ const convertToFahrenheit = function (degree) {
 
 resetRadioButtons();
 app.unitSelection[0].checked = true;
-app.getWeatherData(41.89, 12.51, "Rome", "Italy");
+app.getWeatherData(45, 7.68, "Turin", "Italy");
