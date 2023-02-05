@@ -1,18 +1,15 @@
-//converti unità di misure tu!
-//non mi piace lasciare printvalue dentro la funzione...
 const app = (function () {
     let temperatureUnit = "celsius";
 
-    async function getSearchResults(location) {
-        let data = {};
+    async function getSearchResult(location) {
         try {
             const response = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${location}`, { mode: 'cors' });
             const jsonData = await response.json();
-            data.latitude = jsonData.results[0].latitude;
-            data.longitude = jsonData.results[0].longitude;
-            data.locationName = jsonData.results[0].name;
-            data.country = jsonData.results[0].country;
-            return data;
+            const latitude = jsonData.results[0].latitude;
+            const longitude = jsonData.results[0].longitude;
+            const locationName = jsonData.results[0].name;
+            const country = jsonData.results[0].country;
+            getWeatherData(latitude, longitude, locationName, country);
         } catch {
             ui.showErrors();
             ui.errorMsg.textContent = "The location doesn't exist or you typed it wrong. Please retry.";
@@ -23,7 +20,10 @@ const app = (function () {
         try {
             const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&timezone=auto&temperature_unit=${temperatureUnit}`, { mode: 'cors' });
             const jsonData = await response.json();
-            ui.printValues(jsonData, locationName, country);
+            const temperature = jsonData.current_weather.temperature;
+            const weatherCode = jsonData.current_weather.weathercode;
+            const time = Number(jsonData.current_weather.time.split('T')[1].split(":")[0]);
+            ui.printValues(temperature, temperatureUnit, weatherCode, time, locationName, country);
         }
         catch {
             ui.showErrors();
@@ -37,7 +37,13 @@ const app = (function () {
         resetRadioButtons();
         event.target.checked = true;
         temperatureUnit = event.target.value;
-        getWeatherData(data.latitude, data.longitude, data.locationName, data.country);
+        if (temperatureUnit === "fahrenheit") {
+            const CToFDegrees = convertToFahrenheit(Number(ui.temperature.textContent.split("°")[0]));
+            ui.printTemperature(CToFDegrees, "fahrenheit");
+        } else {
+            const FToCDegrees = convertToCelsius(Number(ui.temperature.textContent.split("°")[0]));
+            ui.printTemperature(FToCDegrees, "celsius");
+        }
     }));
 
     const input = document.querySelector('input[type="text"]');
@@ -49,12 +55,12 @@ const app = (function () {
             ui.showErrors();
             event.preventDefault();
         } else {
-            getSearchResults(input.value).then(result => getWeatherData(result.latitude, result.longitude, result.locationName, result.country));
+            getSearchResult(input.value)
             input.value = "";
         }
     });
 
-    return { unitSelection, temperatureUnit, input };
+    return { unitSelection, temperatureUnit, input, getWeatherData };
 })();
 
 const ui = (function () {
@@ -63,13 +69,16 @@ const ui = (function () {
     const weather = document.querySelector(".weather");
     const errorMsg = document.querySelector(".error");
 
-    function printValues(json, locationName, country) {
+    function printTemperature(degree, temperatureUnit) {
+        let unitSymbol;
+        temperatureUnit === "celsius" ? unitSymbol = "°C" : unitSymbol = "°F";
+        temperature.textContent = degree + unitSymbol;
+    }
+
+    function printValues(temperature, temperatureUnit, weatherCode, time, locationName, country) {
         const h2 = document.querySelector("h2");
-        h2.textContent = `${locationName}, ${country}`;
-        const unitSymbol = app.temperatureUnit === "celsius" ? "°C" : "°F";
-        temperature.textContent = `${json.current_weather.temperature}${unitSymbol}`;
-        const weatherCode = json.current_weather.weathercode;
-        const time = Number(json.current_weather.time.split('T')[1].split(":")[0]);
+        h2.textContent = `${locationName}, ${country} `;
+        printTemperature(temperature, temperatureUnit);
         switchWeatherClass(weatherCode);
         switchTimeClass(time);
     }
@@ -164,12 +173,23 @@ const ui = (function () {
         errorMsg.textContent = "";
     }
 
-    return { printValues, showErrors, resetErrors, errorMsg }
+    return { printValues, printTemperature, showErrors, resetErrors, errorMsg, temperature }
 })();
 
 function resetRadioButtons() {
     app.unitSelection.forEach(item => item.checked = false);
 }
 
+const convertToCelsius = function (degree) {
+    let conversion = ((degree - 32) * (5 / 9));
+    return parseFloat(conversion.toFixed(1));
+};
+
+const convertToFahrenheit = function (degree) {
+    let conversion = (degree * (9 / 5) + 32);
+    return parseFloat(conversion.toFixed(1));
+};
+
 resetRadioButtons();
 app.unitSelection[0].checked = true;
+app.getWeatherData(41.89, 12.51, "Rome", "Italy");
