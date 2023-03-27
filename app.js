@@ -13,7 +13,7 @@ const app = (function () {
             getWeatherData(latitude, longitude, locationName, country);
         } catch {
             ui.showErrors();
-            ui.errorMsg.textContent = "The location doesn't exist or you typed it wrong. Please retry.";
+            ui.errorMsg.textContent = "The location doesn't exist or you typed it wrong. Retry";
         } finally {
             ui.loader.classList.add("hidden");
         }
@@ -90,13 +90,19 @@ const ui = (function () {
 
     function printTemperature(degree, temperatureUnit) {
         let unitSymbol;
-        temperatureUnit === "celsius" ? unitSymbol = "°C" : unitSymbol = "°F";
-        temperature.textContent = degree + unitSymbol;
+        const span = document.createElement("span");
+        temperatureUnit === "celsius" ? unitSymbol = "C" : unitSymbol = "F";
+        temperature.textContent = `${degree}°`;
+        span.textContent = unitSymbol;
+        temperature.appendChild(span);
     }
 
     function printValues(temperature, temperatureUnit, weatherCode, time, locationName, country) {
         const h2 = document.querySelector("h2");
-        h2.textContent = `${locationName}, ${country} `;
+        const span = document.createElement("span");
+        h2.textContent = `${locationName} - `;
+        span.textContent = country;
+        h2.appendChild(span);
         printTemperature(temperature, temperatureUnit);
         switchWeatherClass(weatherCode);
         switchTimeClass(time);
@@ -184,7 +190,7 @@ const ui = (function () {
     function showErrors() {
         errorMsg.classList.remove("hidden");
         if (app.input.validity.valueMissing) {
-            errorMsg.textContent = "Please write a location.";
+            errorMsg.textContent = "Write a location";
         }
     }
 
@@ -212,15 +218,3 @@ const convertToFahrenheit = function (degree) {
 
 resetRadioButtons();
 app.unitSelection[0].checked = true;
-
-        // weatherData.appendChild(h2);
-
-        // const dataDiv = document.createElement("div");
-        // const paraTemp = document.createElement("p");
-        // paraTemp.classList.add("temperature");
-        // const paraWeather = document.createElement("p");
-        // paraTemp.classList.add("weather");
-
-        // weatherData.appendChild(dataDiv);
-        // dataDiv.appendChild(paraTemp);
-        // dataDiv.appendChild(paraWeather);
