@@ -40,8 +40,6 @@ const app = (function () {
     const unitSelection = [...document.querySelectorAll('input[type="radio"]')];
 
     unitSelection.map(item => item.addEventListener("click", event => {
-        resetRadioButtons();
-        event.target.checked = true;
         temperatureUnit = event.target.value;
         if (temperatureUnit === "fahrenheit") {
             const CToFDegrees = convertToFahrenheit(Number(ui.temperature.textContent.split("°")[0]));
@@ -202,10 +200,6 @@ const ui = (function () {
     return { printValues, printTemperature, showErrors, resetErrors, errorMsg, temperature, weatherData, loader }
 })();
 
-function resetRadioButtons() {
-    app.unitSelection.forEach(item => item.checked = false);
-}
-
 const convertToCelsius = function (degree) {
     let conversion = ((degree - 32) * (5 / 9));
     return parseFloat(conversion.toFixed(1));
@@ -216,5 +210,4 @@ const convertToFahrenheit = function (degree) {
     return parseFloat(conversion.toFixed(1));
 };
 
-resetRadioButtons();
 app.unitSelection[0].checked = true;
