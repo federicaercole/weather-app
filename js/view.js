@@ -10,6 +10,8 @@ export default class View {
         this.nodes.weatherData = this.#$(".weather-data");
         this.nodes.errorMsg = this.#$(".error");
         this.nodes.loader = this.#$(".loader");
+        this.nodes.input = this.#$('input[type="text"]');
+        this.nodes.form = this.#$("form");
     }
 
     #$ = document.querySelector.bind(document);
@@ -21,7 +23,7 @@ export default class View {
         const span = this.#createElement("span");
         title.textContent = `${locationName} - `;
         span.textContent = country;
-        h2.appendChild(span);
+        title.appendChild(span);
         // printTemperature(temperature, temperatureUnit);
         this.#switchWeatherClass(weatherCode);
         // switchTimeClass(time);
@@ -36,6 +38,10 @@ export default class View {
     //     span.textContent = unitSymbol;
     //     temperature.appendChild(span);
     // }
+
+    searchResultHandler(handler) {
+        return this.nodes.form.addEventListener("submit", handler);
+    }
 
     #setUI(text, ...classes) {
         this.nodes.weather.textContent = text;
