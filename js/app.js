@@ -9,25 +9,33 @@ function init() {
 
     async function search(event) {
         event.preventDefault();
-        // ui.resetErrors();
-        // ui.weatherData.classList.add("hidden");
+        view.setErrorMsgClass("add");
         if (view.nodes.input.validity.valueMissing) {
-            // ui.showErrors();
+            return view.setErrorMsgClass("remove")("Write a location");
         } else {
-            await tryToGetData();
+            return await tryToGetData();
         }
     }
 
     view.searchResultHandler(search);
 
     async function tryToGetData() {
+        let geographicData;
+        let data;
+
         view.nodes.loader.classList.remove("hidden");
+
         try {
-            const geographicData = await model.getSearchResult(view.nodes.input.value);
-            const data = await model.getWeatherData(geographicData);
+            geographicData = await model.getSearchResult(view.nodes.input.value);
+            data = await model.getWeatherData(geographicData);
             view.printValues(data);
-        } catch (err) {
-            console.log(err)
+        } catch {
+            const error = view.setErrorMsgClass("remove");
+            if (!geographicData) {
+                return error("The location doesn't exist or you typed it wrong. Retry");
+            } else {
+                return error("Weather is not available!");
+            }
         } finally {
             view.nodes.loader.classList.add("hidden");
         }

@@ -43,6 +43,16 @@ export default class View {
         return this.nodes.form.addEventListener("submit", handler);
     }
 
+    setErrorMsgClass(action) {
+        this.nodes.errorMsg.classList[action]("hidden");
+
+        const setErrorMsgText = (error) => {
+            this.nodes.errorMsg.textContent = error;
+        };
+
+        return setErrorMsgText;
+    }
+
     #setUI(text, ...classes) {
         this.nodes.weather.textContent = text;
         this.nodes.body.setAttribute("class", "");
@@ -111,16 +121,4 @@ export default class View {
 //     if (time >= 18 && time <= 23 || time >= 0 && time <= 6) {
 //         body.classList.add("night");
 //     }
-// }
-
-// function showErrors() {
-//     errorMsg.classList.remove("hidden");
-//     if (app.input.validity.valueMissing) {
-//         errorMsg.textContent = "Write a location";
-//     }
-// }
-
-// function resetErrors() {
-//     errorMsg.classList.add("hidden");
-//     errorMsg.textContent = "";
 // }

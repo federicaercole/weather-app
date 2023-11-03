@@ -9,10 +9,6 @@ export default class Model {
             country: data.results[0].country,
         }
         return geographicData;
-        // } catch {
-        // ui.showErrors();
-        // ui.errorMsg.textContent = "The location doesn't exist or you typed it wrong. Retry";
-        // }
     }
 
     async getWeatherData(object) {
@@ -25,10 +21,6 @@ export default class Model {
             country: object.country,
         }
         return weatherData;
-        // catch {
-        //     ui.showErrors();
-        //     ui.errorMsg.textContent = "Weather is not available!"
-        // }
     }
 
     async #fetchData(url) {
