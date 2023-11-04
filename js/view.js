@@ -18,26 +18,23 @@ export default class View {
     #createElement = document.createElement.bind(document);
 
     printValues(object) {
-        const { temperature, temperatureUnit, weatherCode, time, locationName, country } = object;
+        const { currentTemperature, temperatureUnit, weatherCode, time, locationName, country } = object;
         const title = this.#$("h2");
         const span = this.#createElement("span");
         title.textContent = `${locationName} - `;
         span.textContent = country;
         title.appendChild(span);
-        // printTemperature(temperature, temperatureUnit);
-        this.#switchWeatherClass(weatherCode);
-        // switchTimeClass(time);
+        this.nodes.temperature.textContent = `${currentTemperature}°`;
+        this.#printTemperatureUnit(temperatureUnit);
+        this.#changeWeatherClass(weatherCode, time);
         this.nodes.weatherData.classList.remove("hidden");
     }
 
-    // function printTemperature(degree, temperatureUnit) {
-    //     let unitSymbol;
-    //     const span = document.createElement("span");
-    //     temperatureUnit === "celsius" ? unitSymbol = "C" : unitSymbol = "F";
-    //     temperature.textContent = `${degree}°`;
-    //     span.textContent = unitSymbol;
-    //     temperature.appendChild(span);
-    // }
+    #printTemperatureUnit(temperatureUnit) {
+        const span = this.#createElement("span");
+        span.textContent = temperatureUnit === "celsius" ? "C" : "F";;
+        this.nodes.temperature.appendChild(span);
+    }
 
     searchResultHandler(handler) {
         return this.nodes.form.addEventListener("submit", handler);
@@ -59,7 +56,7 @@ export default class View {
         classes.map(item => this.nodes.body.classList.add(item));
     }
 
-    #switchWeatherClass(weatherCode) {
+    #changeWeatherClass(weatherCode, time) {
         switch (weatherCode) {
             case 0:
                 this.#setUI("Clear sky", "clear");
@@ -114,11 +111,8 @@ export default class View {
                 this.#setUI("Thunderstorm with hail", "thunderstorm");
                 break;
         }
+        if (time >= 18 && time <= 23 || time >= 0 && time <= 6) {
+            this.nodes.body.classList.add("night");
+        }
     }
 }
-
-// function switchTimeClass(time) {
-//     if (time >= 18 && time <= 23 || time >= 0 && time <= 6) {
-//         body.classList.add("night");
-//     }
-// }

@@ -10,6 +10,7 @@ function init() {
     async function search(event) {
         event.preventDefault();
         view.setErrorMsgClass("add");
+        view.nodes.weatherData.classList.add("hidden");
         if (view.nodes.input.validity.valueMissing) {
             return view.setErrorMsgClass("remove")("Write a location");
         } else {
@@ -27,8 +28,8 @@ function init() {
 
         try {
             geographicData = await model.getSearchResult(view.nodes.input.value);
-            data = await model.getWeatherData(geographicData);
-            view.printValues(data);
+            data = await model.getWeatherData(geographicData, temperatureUnit);
+            return view.printValues(data);
         } catch {
             const error = view.setErrorMsgClass("remove");
             if (!geographicData) {

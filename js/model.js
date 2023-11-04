@@ -11,14 +11,15 @@ export default class Model {
         return geographicData;
     }
 
-    async getWeatherData(object) {
-        const data = await this.#fetchData(`https://api.open-meteo.com/v1/forecast?latitude=${object.latitude}&longitude=${object.longitude}&current_weather=true&timezone=auto`);
+    async getWeatherData(object, temperatureUnit) {
+        const data = await this.#fetchData(`https://api.open-meteo.com/v1/forecast?latitude=${object.latitude}&longitude=${object.longitude}&current_weather=true&timezone=auto&temperature_unit=${temperatureUnit}`);
         const weatherData = {
             currentTemperature: data.current_weather.temperature,
             weatherCode: data.current_weather.weathercode,
             time: Number(data.current_weather.time.split('T')[1].split(":")[0]),
             locationName: object.locationName,
             country: object.country,
+            temperatureUnit,
         }
         return weatherData;
     }
