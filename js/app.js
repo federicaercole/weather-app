@@ -7,6 +7,9 @@ function init() {
     const view = new View();
     const model = new Model();
 
+    view.searchResultHandler(search);
+    view.unitSelectionHandler(toggleUnit);
+
     async function search(event) {
         event.preventDefault();
         view.setErrorMsgClass("add");
@@ -18,7 +21,17 @@ function init() {
         }
     }
 
-    view.searchResultHandler(search);
+    function toggleUnit(event) {
+        temperatureUnit = event.target.value;
+        const degrees = Number(view.nodes.temperature.textContent.split("°")[0]);
+        const unitConversion = convertUnit(degrees);
+        return view.printTemperature(unitConversion, temperatureUnit);
+    }
+
+    function convertUnit(degrees) {
+        const conversion = temperatureUnit === "celsius" ? ((degrees - 32) * (5 / 9)) : (degrees * (9 / 5) + 32);
+        return parseFloat(conversion.toFixed(1));
+    }
 
     async function tryToGetData() {
         let geographicData;
@@ -44,32 +57,3 @@ function init() {
 }
 
 init();
-
-// const app = (function () {
-//
-//     const unitSelection = [...document.querySelectorAll('input[type="radio"]')];
-//     unitSelection.map(item => item.addEventListener("click", event => {
-//         temperatureUnit = event.target.value;
-//         if (temperatureUnit === "fahrenheit") {
-//             const CToFDegrees = convertToFahrenheit(Number(ui.temperature.textContent.split("°")[0]));
-//             ui.printTemperature(CToFDegrees, "fahrenheit");
-//         } else {
-//             const FToCDegrees = convertToCelsius(Number(ui.temperature.textContent.split("°")[0]));
-//             ui.printTemperature(FToCDegrees, "celsius");
-//         }
-//     }));
-
-//     return { unitSelection, temperatureUnit, input, getWeatherData };
-// })();
-
-// const convertToCelsius = function (degree) {
-//     let conversion = ((degree - 32) * (5 / 9));
-//     return parseFloat(conversion.toFixed(1));
-// };
-
-// const convertToFahrenheit = function (degree) {
-//     let conversion = (degree * (9 / 5) + 32);
-//     return parseFloat(conversion.toFixed(1));
-// };
-
-// app.unitSelection[0].checked = true;

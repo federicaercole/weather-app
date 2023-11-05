@@ -12,9 +12,11 @@ export default class View {
         this.nodes.loader = this.#$(".loader");
         this.nodes.input = this.#$('input[type="text"]');
         this.nodes.form = this.#$("form");
+        this.nodes.unitSelection = [...this.#$$('input[type="radio"]')];
     }
 
     #$ = document.querySelector.bind(document);
+    #$$ = document.querySelectorAll.bind(document);
     #createElement = document.createElement.bind(document);
 
     printValues(object) {
@@ -24,20 +26,24 @@ export default class View {
         title.textContent = `${locationName} - `;
         span.textContent = country;
         title.appendChild(span);
-        this.nodes.temperature.textContent = `${currentTemperature}°`;
-        this.#printTemperatureUnit(temperatureUnit);
+        this.printTemperature(currentTemperature, temperatureUnit);
         this.#changeWeatherClass(weatherCode, time);
         this.nodes.weatherData.classList.remove("hidden");
     }
 
-    #printTemperatureUnit(temperatureUnit) {
+    printTemperature(degree, temperatureUnit) {
         const span = this.#createElement("span");
-        span.textContent = temperatureUnit === "celsius" ? "C" : "F";;
+        this.nodes.temperature.textContent = `${degree}°`;
+        span.textContent = temperatureUnit === "celsius" ? "C" : "F";
         this.nodes.temperature.appendChild(span);
     }
 
     searchResultHandler(handler) {
         return this.nodes.form.addEventListener("submit", handler);
+    }
+
+    unitSelectionHandler(handler) {
+        return this.nodes.unitSelection.map(item => item.addEventListener("click", handler));
     }
 
     setErrorMsgClass(action) {
