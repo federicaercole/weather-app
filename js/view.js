@@ -4,9 +4,6 @@ export default class View {
     nodes = {}
 
     constructor() {
-        this.nodes.body = this.#$("body");
-        this.nodes.temperature = this.#$(".temperature");
-        this.nodes.weather = this.#$(".weather");
         this.nodes.weatherData = this.#$(".weather-data");
         this.nodes.errorMsg = this.#$(".error");
         this.nodes.loader = this.#$(".loader");
@@ -19,24 +16,67 @@ export default class View {
     #$$ = document.querySelectorAll.bind(document);
     #createElement = document.createElement.bind(document);
 
-    printValues(object) {
-        const { currentTemperature, temperatureUnit, weatherCode, time, locationName, country } = object;
-        const title = this.#$("h2");
+    printWeather(object) {
+        const { dailyWeather: { day }, locationName, country } = object;
+        day.map((item, index) => this.#createDailyItem(object, index));
+        this.#printCurrentWeatherValues(object);
+        this.#printLocationName(locationName, country);
+    }
+
+    #printLocationName(locationName, country) {
+        const title = this.#createElement("h2");
         const span = this.#createElement("span");
         title.textContent = `${locationName} - `;
         span.textContent = country;
         title.appendChild(span);
-        this.printTemperature(currentTemperature, temperatureUnit);
-        this.#changeWeatherClass(weatherCode, time);
-        this.nodes.weatherData.classList.remove("hidden");
+        return this.nodes.weatherData.prepend(title);
     }
 
-    printTemperature(degree, temperatureUnit) {
-        const span = this.#createElement("span");
-        this.nodes.temperature.textContent = `${degree}°`;
-        span.textContent = temperatureUnit === "celsius" ? "C" : "F";
-        this.nodes.temperature.appendChild(span);
+    #printCurrentWeatherValues(object) {
+        const { currentWeather: { currentTemperature, weatherCode, isDay }, temperatureUnit } = object;
+        const todayForecastNode = this.#$("article");
+        const weatherDataNode = todayForecastNode.querySelector(".data>div");
+        const p = this.#createElement("p");
+        p.classList.add("temperature");
+        p.textContent = `${currentTemperature}${temperatureUnit}`;
+        weatherDataNode.prepend(p);
+        this.#changeWeatherClass(todayForecastNode, weatherCode, isDay);
     }
+
+    #createDailyItem(object, index) {
+        const { dailyWeather: { weatherCode, day, minTemperature, maxTemperature }, temperatureUnit } = object;
+        const date = new Date(day[index]).toLocaleDateString(window.navigator.language, {
+            weekday: "short",
+            day: "numeric",
+            month: "numeric"
+        });
+        const card = `<article>
+        <p class="day">${date}</p>
+        <div class="data">
+            <div>
+                <p class="weather"></p>
+            </div>
+        </div>
+        <div class="minmax">
+            <p class="temperature">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="m12.75 16.19l2.72-2.72a.75.75 0 1 1 1.06 1.06l-4 4a.75.75 0 0 1-1.06 0l-4-4a.75.75 0 1 1 1.06-1.06l2.72 2.72V6.5a.75.75 0 0 1 1.5 0v9.69Z" aria-hidden="true" focusable="false"/></svg>
+            Min: ${minTemperature[index]}${temperatureUnit}</p>
+            <p class="temperature">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M8.53 10.53a.75.75 0 1 1-1.06-1.06l4-4a.75.75 0 0 1 1.06 0l4 4a.75.75 0 1 1-1.06 1.06l-2.72-2.72v9.69a.75.75 0 0 1-1.5 0V7.81l-2.72 2.72Z" aria-hidden="true" focusable="false"/></svg>
+            Max: ${maxTemperature[index]}${temperatureUnit}</p>
+        </div>
+    </article>`;
+        this.nodes.weatherData.innerHTML += card;
+        const cardNode = this.#$(`.weather-data>article:nth-child(${index + 1})`);
+        return this.#changeWeatherClass(cardNode, weatherCode[index]);
+    }
+
+    // printTemperature(degrees, temperatureUnit) {
+    //     const span = this.#createElement("span");
+    //     this.nodes.temperature.textContent = `${item}°`;
+    //     span.textContent = temperatureUnit === "celsius" ? "C" : "F";
+    //     this.nodes.temperature.appendChild(span);
+    // }
 
     searchResultHandler(handler) {
         return this.nodes.form.addEventListener("submit", handler);
@@ -56,69 +96,73 @@ export default class View {
         return setErrorMsgText;
     }
 
-    #setUI(text, ...classes) {
-        this.nodes.weather.textContent = text;
-        this.nodes.body.setAttribute("class", "");
-        classes.map(item => this.nodes.body.classList.add(item));
+    #setUI(node) {
+        const weatherDesc = node.querySelector(".data .weather");
+        node.setAttribute("class", "");
+        return function setTextandClasses(text, ...classes) {
+            weatherDesc.textContent = text;
+            classes.map(item => node.classList.add(item));
+        }
     }
 
-    #changeWeatherClass(weatherCode, time) {
+    #changeWeatherClass(node, weatherCode, isDay) {
+        const setNodeUI = this.#setUI(node);
         switch (weatherCode) {
             case 0:
-                this.#setUI("Clear sky", "clear");
+                setNodeUI("Clear sky", "clear");
                 break;
             case 1:
-                this.#setUI("Mainly clear", "clear");
+                setNodeUI("Mainly clear", "clear");
                 break;
             case 2:
             case 3:
-                this.#setUI("Cloudy", "cloudy");
+                setNodeUI("Cloudy", "cloudy");
                 break;
             case 45:
             case 48:
-                this.#setUI("Fog", "fog", "dark-text");
+                setNodeUI("Fog", "fog", "dark-text");
                 break;
             case 51:
             case 53:
             case 55:
             case 56:
             case 57:
-                this.#setUI("Drizzle", "light-rain");
+                setNodeUI("Drizzle", "light-rain");
                 break;
             case 61:
             case 63:
             case 65:
             case 66:
             case 67:
-                this.#setUI("Rain", "rain");
+                setNodeUI("Rain", "rain");
                 break;
             case 71:
             case 73:
             case 75:
-                this.#setUI("Snow fall", "snow", "dark-text");
+                setNodeUI("Snow fall", "snow", "dark-text");
                 break;
             case 77:
-                this.#setUI("Snow grains", "snow", "dark-text");
+                setNodeUI("Snow grains", "snow", "dark-text");
                 break;
             case 80:
             case 81:
             case 82:
-                this.#setUI("Rain shower", "rain");
+                setNodeUI("Rain shower", "rain");
                 break;
             case 85:
             case 86:
-                this.#setUI("Snow shower", "snow");
+                setNodeUI("Snow shower", "snow", "dark-text");
                 break;
             case 95:
-                this.#setUI("Thunderstorm", "thunderstorm");
+                setNodeUI("Thunderstorm", "thunderstorm");
                 break;
             case 96:
             case 99:
-                this.#setUI("Thunderstorm with hail", "thunderstorm");
+                setNodeUI("Thunderstorm with hail", "thunderstorm");
                 break;
         }
-        if (time >= 18 && time <= 23 || time >= 0 && time <= 6) {
-            this.nodes.body.classList.add("night");
+        if (isDay === 0) {
+            node.classList.add("night");
         }
     }
 }

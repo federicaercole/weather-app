@@ -12,14 +12,22 @@ export default class Model {
     }
 
     async getWeatherData(object, temperatureUnit) {
-        const data = await this.#fetchData(`https://api.open-meteo.com/v1/forecast?latitude=${object.latitude}&longitude=${object.longitude}&current_weather=true&timezone=auto&temperature_unit=${temperatureUnit}`);
+        const data = await this.#fetchData(`https://api.open-meteo.com/v1/forecast?latitude=${object.latitude}&longitude=${object.longitude}&current=temperature_2m,is_day,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&temperature_unit=${temperatureUnit}`);
         const weatherData = {
-            currentTemperature: data.current_weather.temperature,
-            weatherCode: data.current_weather.weathercode,
-            time: Number(data.current_weather.time.split('T')[1].split(":")[0]),
+            currentWeather: {
+                currentTemperature: data.current.temperature_2m,
+                weatherCode: data.current.weather_code,
+                isDay: data.current.is_day,
+            },
+            dailyWeather: {
+                day: [...data.daily.time],
+                weatherCode: [...data.daily.weather_code],
+                minTemperature: [...data.daily.temperature_2m_min],
+                maxTemperature: [...data.daily.temperature_2m_max],
+            },
             locationName: object.locationName,
             country: object.country,
-            temperatureUnit,
+            temperatureUnit: data.current_units.temperature_2m,
         }
         return weatherData;
     }
