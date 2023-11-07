@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 
-<body class="clear">
+<body>
     <h1>Weather App</h1>
     <main>
         <form novalidate>
@@ -33,13 +33,7 @@
             <div class="error hidden" aria-live="polite"></div>
         </form>
         <div class="loader hidden"></div>
-        <div class="weather-data hidden">
-            <h2>City</h2>
-            <div class="data">
-                <p class="temperature">10°C</p>
-                <p class="weather">Weather</p>
-            </div>
-        </div>
+        <div class="weather-data"></div>
     </main>
     <footer><a href="https://open-meteo.com/">Weather data by Open-Meteo.com</a></footer>
     <script src="./js/app.js" type="module"></script>
