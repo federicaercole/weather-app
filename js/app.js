@@ -10,27 +10,24 @@ function init() {
     view.searchResultHandler(search);
     view.unitSelectionHandler(toggleUnit);
 
-    async function search(event) {
+    function search(event) {
         event.preventDefault();
+        return dataValidation();
+    }
+
+    function toggleUnit(event) {
+        temperatureUnit = event.target.value;
+        return dataValidation();
+    }
+
+    function dataValidation() {
         view.setErrorMsgClass("add");
         view.nodes.weatherData.innerHTML = "";
         if (view.nodes.input.validity.valueMissing) {
             return view.setErrorMsgClass("remove")("Write a location");
         } else {
-            return await tryToGetData();
+            return tryToGetData();
         }
-    }
-
-    function toggleUnit(event) {
-        temperatureUnit = event.target.value;
-        const degrees = Number(view.nodes.temperature.textContent.split("°")[0]);
-        const unitConversion = convertUnit(degrees);
-        return view.printTemperature(unitConversion, temperatureUnit);
-    }
-
-    function convertUnit(degrees) {
-        const conversion = temperatureUnit === "celsius" ? ((degrees - 32) * (5 / 9)) : (degrees * (9 / 5) + 32);
-        return parseFloat(conversion.toFixed(1));
     }
 
     async function tryToGetData() {

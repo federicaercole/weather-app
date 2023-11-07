@@ -71,13 +71,6 @@ export default class View {
         return this.#changeWeatherClass(cardNode, weatherCode[index]);
     }
 
-    // printTemperature(degrees, temperatureUnit) {
-    //     const span = this.#createElement("span");
-    //     this.nodes.temperature.textContent = `${item}°`;
-    //     span.textContent = temperatureUnit === "celsius" ? "C" : "F";
-    //     this.nodes.temperature.appendChild(span);
-    // }
-
     searchResultHandler(handler) {
         return this.nodes.form.addEventListener("submit", handler);
     }
