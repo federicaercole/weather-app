@@ -16,6 +16,7 @@ function init() {
         clearTimeout(typingTimer);
         if (view.nodes.input.validity.valueMissing) {
             view.nodes.locations.innerHTML = "";
+            view.toggleSuggestionBox(false);
         } else {
             typingTimer = setTimeout(APICall, 500);
         }
@@ -26,13 +27,12 @@ function init() {
         const results = searchData.results;
 
         if (results) {
-            view.nodes.locations.classList.remove("hidden");
+            view.toggleSuggestionBox(true);
             const liElements = results.map((result) => {
-                const li = view.createResultOption(result);
+                const li = view.createResultOption(result, results);
                 li.addEventListener("mousedown", () => {
                     view.nodes.input.value = result.name;
                     currentLocation = result;
-                    view.resetUI();
                     dataValidation();
                 });
                 return li;
@@ -44,11 +44,11 @@ function init() {
 
     function toggleUnit(event) {
         temperatureUnit = event.target.value;
-        view.resetUI();
         return dataValidation();
     }
 
     function dataValidation() {
+        view.resetUI();
         if (!currentLocation) {
             return view.setErrorMsgClass("remove")("Write a location");
         } else {

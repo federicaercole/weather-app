@@ -12,16 +12,24 @@ export default class View {
         this.nodes.unitSelection = [...this.#$$('input[type="radio"]')];
         window.addEventListener("load", () => this.nodes.input.value = "");
         this.nodes.input.addEventListener("focus", () => {
-            this.nodes.locations.classList.remove("hidden");
+            if (!this.nodes.input.validity.valueMissing) {
+                this.toggleSuggestionBox(true);
+            }
         });
         this.nodes.input.addEventListener("blur", () => {
-            this.nodes.locations.classList.add("hidden");
+            this.toggleSuggestionBox(false);
         });
     }
 
     #$ = document.querySelector.bind(document);
     #$$ = document.querySelectorAll.bind(document);
     #createElement = document.createElement.bind(document);
+
+    toggleSuggestionBox(isExpanded) {
+        const action = isExpanded === true ? "remove" : "add";
+        this.nodes.locations.classList[action]("hidden");
+        this.nodes.input.setAttribute("aria-expanded", isExpanded);
+    }
 
     printWeather(object) {
         const { dailyWeather: { day }, locationName, country } = object;
@@ -86,9 +94,14 @@ export default class View {
         return this.nodes.unitSelection.map(item => item.addEventListener("click", handler));
     }
 
-    createResultOption(item) {
+    createResultOption(item, results) {
         const li = this.#createElement("li");
         li.textContent = `${item.name} - ${item.country}`;
+        li.setAttribute("role", "option");
+        li.setAttribute("aria-selected", "false");
+        li.setAttribute("aria-setsize", `${results.length}`);
+        li.setAttribute("aria-posinset", `${results.indexOf(item) + 1}`);
+        li.setAttribute("tabindex", "-1");
         return li;
     }
 
@@ -105,7 +118,7 @@ export default class View {
     resetUI() {
         this.setErrorMsgClass("add");
         this.nodes.weatherData.innerHTML = "";
-        this.nodes.locations.classList.add("hidden");
+        this.toggleSuggestionBox(false);
     }
 
     #setUI(node) {
