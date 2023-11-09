@@ -1,12 +1,15 @@
 export default class Model {
 
-    async getSearchResult(location) {
-        const data = await this.#fetchData(`https://geocoding-api.open-meteo.com/v1/search?name=${location}`);
+    async getSearchResults(location) {
+        return await this.#fetchData(`https://geocoding-api.open-meteo.com/v1/search?name=${location}`);
+    }
+
+    getGeographicData(item) {
         const geographicData = {
-            latitude: data.results[0].latitude,
-            longitude: data.results[0].longitude,
-            locationName: data.results[0].name,
-            country: data.results[0].country,
+            latitude: item.latitude,
+            longitude: item.longitude,
+            locationName: item.name,
+            country: item.country,
         }
         return geographicData;
     }

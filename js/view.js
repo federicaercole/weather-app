@@ -8,8 +8,15 @@ export default class View {
         this.nodes.errorMsg = this.#$(".error");
         this.nodes.loader = this.#$(".loader");
         this.nodes.input = this.#$('input[type="text"]');
-        this.nodes.form = this.#$("form");
+        this.nodes.locations = this.#$("#locations");
         this.nodes.unitSelection = [...this.#$$('input[type="radio"]')];
+        window.addEventListener("load", () => this.nodes.input.value = "");
+        this.nodes.input.addEventListener("focus", () => {
+            this.nodes.locations.classList.remove("hidden");
+        });
+        this.nodes.input.addEventListener("blur", () => {
+            this.nodes.locations.classList.add("hidden");
+        });
     }
 
     #$ = document.querySelector.bind(document);
@@ -71,12 +78,18 @@ export default class View {
         return this.#changeWeatherClass(cardNode, weatherCode[index]);
     }
 
-    searchResultHandler(handler) {
-        return this.nodes.form.addEventListener("submit", handler);
+    inputHandler(handler) {
+        return this.nodes.input.addEventListener("keyup", handler);
     }
 
     unitSelectionHandler(handler) {
         return this.nodes.unitSelection.map(item => item.addEventListener("click", handler));
+    }
+
+    createResultOption(item) {
+        const li = this.#createElement("li");
+        li.textContent = `${item.name} - ${item.country}`;
+        return li;
     }
 
     setErrorMsgClass(action) {
@@ -87,6 +100,12 @@ export default class View {
         };
 
         return setErrorMsgText;
+    }
+
+    resetUI() {
+        this.setErrorMsgClass("add");
+        this.nodes.weatherData.innerHTML = "";
+        this.nodes.locations.classList.add("hidden");
     }
 
     #setUI(node) {

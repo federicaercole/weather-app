@@ -3,27 +3,53 @@ import View from "./view.js"
 
 function init() {
     let temperatureUnit = "celsius";
+    let currentLocation;
+    let typingTimer;
 
     const view = new View();
     const model = new Model();
 
-    view.searchResultHandler(search);
     view.unitSelectionHandler(toggleUnit);
+    view.inputHandler(handleInput);
 
-    function search(event) {
-        event.preventDefault();
-        return dataValidation();
+    function handleInput() {
+        clearTimeout(typingTimer);
+        if (view.nodes.input.validity.valueMissing) {
+            view.nodes.locations.innerHTML = "";
+        } else {
+            typingTimer = setTimeout(APICall, 500);
+        }
+    }
+
+    async function APICall() {
+        const searchData = await model.getSearchResults(view.nodes.input.value);
+        const results = searchData.results;
+
+        if (results) {
+            view.nodes.locations.classList.remove("hidden");
+            const liElements = results.map((result) => {
+                const li = view.createResultOption(result);
+                li.addEventListener("mousedown", () => {
+                    view.nodes.input.value = result.name;
+                    currentLocation = result;
+                    view.resetUI();
+                    dataValidation();
+                });
+                return li;
+            });
+            view.nodes.locations.innerHTML = "";
+            view.nodes.locations.append(...liElements);
+        }
     }
 
     function toggleUnit(event) {
         temperatureUnit = event.target.value;
+        view.resetUI();
         return dataValidation();
     }
 
     function dataValidation() {
-        view.setErrorMsgClass("add");
-        view.nodes.weatherData.innerHTML = "";
-        if (view.nodes.input.validity.valueMissing) {
+        if (!currentLocation) {
             return view.setErrorMsgClass("remove")("Write a location");
         } else {
             return tryToGetData();
@@ -37,7 +63,7 @@ function init() {
         view.nodes.loader.classList.remove("hidden");
 
         try {
-            geographicData = await model.getSearchResult(view.nodes.input.value);
+            geographicData = model.getGeographicData(currentLocation);
             data = await model.getWeatherData(geographicData, temperatureUnit);
             return view.printWeather(data);
         } catch {
