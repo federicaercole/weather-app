@@ -3,22 +3,60 @@ export default class View {
 
     nodes = {}
 
+    locationsElements = {
+        list: null,
+        index: -1,
+        increaseIndex() { return this.index++; },
+        decreaseIndex() { return this.index--; },
+        resetIndex() { return this.index = -1 },
+    }
+
     constructor() {
         this.nodes.weatherData = this.#$(".weather-data");
         this.nodes.errorMsg = this.#$(".error");
         this.nodes.loader = this.#$(".loader");
+        this.nodes.search = this.#$(".search");
         this.nodes.input = this.#$('input[type="text"]');
         this.nodes.locations = this.#$("#locations");
         this.nodes.unitSelection = [...this.#$$('input[type="radio"]')];
         window.addEventListener("load", () => this.nodes.input.value = "");
-        this.nodes.input.addEventListener("focus", () => {
-            if (!this.nodes.input.validity.valueMissing) {
-                this.toggleSuggestionBox(true);
+        this.nodes.input.addEventListener("focus", () => { if (!this.nodes.input.validity.valueMissing) this.toggleSuggestionBox(true); });
+        this.nodes.input.addEventListener("blur", () => { this.toggleSuggestionBox(false); });
+        this.nodes.input.addEventListener("keydown", this.handleSuggestionBoxKeys);
+    }
+
+    handleSuggestionBoxKeys = (event) => {
+        if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+            event.preventDefault();
+            this.locationsElements.list.forEach(item => { item.classList.remove("selected"); item.setAttribute("aria-selected", false) })
+            if (event.key === "ArrowDown") {
+                if (this.locationsElements.index < (this.locationsElements.list.length - 1)) {
+                    this.locationsElements.increaseIndex();
+                }
+            } else if (event.key === "ArrowUp") {
+                if (this.locationsElements.index > -1) {
+                    this.locationsElements.decreaseIndex();
+                }
             }
-        });
-        this.nodes.input.addEventListener("blur", () => {
-            this.toggleSuggestionBox(false);
-        });
+            if (this.locationsElements.index !== -1) {
+                const currentElement = this.locationsElements.list[this.locationsElements.index];
+                this.nodes.input.setAttribute("aria-activedescendant", `${currentElement.id}`)
+                currentElement.setAttribute("aria-selected", true);
+                currentElement.scrollIntoView();
+                return currentElement.classList.add("selected");
+            } else {
+                this.locationsElements.list.forEach(item => { item.classList.remove("selected"); item.setAttribute("aria-selected", false) })
+                return this.nodes.input.removeAttribute("aria-activedescendant");
+            }
+        }
+
+        if (event.key === "Escape" || event.key === "Tab") {
+            return this.toggleSuggestionBox(false);
+        }
+
+        if (event.key === "Enter") {
+            return this.#$(".selected").dispatchEvent(new Event("loadForecast"));
+        }
     }
 
     #$ = document.querySelector.bind(document);
@@ -29,6 +67,7 @@ export default class View {
         const action = isExpanded === true ? "remove" : "add";
         this.nodes.locations.classList[action]("hidden");
         this.nodes.input.setAttribute("aria-expanded", isExpanded);
+        this.locationsElements.resetIndex();
     }
 
     printWeather(object) {
@@ -94,14 +133,21 @@ export default class View {
         return this.nodes.unitSelection.map(item => item.addEventListener("click", handler));
     }
 
-    createResultOption(item, results) {
+    createResultOption(item, results, handler) {
         const li = this.#createElement("li");
         li.textContent = `${item.name} - ${item.country}`;
+        if (item.admin1) {
+            const span = this.#createElement("span");
+            span.textContent = `${item.admin1}`;
+            li.appendChild(span);
+        }
+        li.setAttribute("id", `${item.id}`)
         li.setAttribute("role", "option");
         li.setAttribute("aria-selected", "false");
         li.setAttribute("aria-setsize", `${results.length}`);
         li.setAttribute("aria-posinset", `${results.indexOf(item) + 1}`);
-        li.setAttribute("tabindex", "-1");
+        li.addEventListener("mousedown", handler);
+        li.addEventListener("loadForecast", handler);
         return li;
     }
 
