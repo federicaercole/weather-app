@@ -6,8 +6,8 @@ export default class View {
     locationsElements = {
         list: null,
         index: -1,
-        increaseIndex() { return this.index++; },
-        decreaseIndex() { return this.index--; },
+        increaseIndex() { return this.index++ },
+        decreaseIndex() { return this.index-- },
         resetIndex() { return this.index = -1 },
     }
 
@@ -22,31 +22,43 @@ export default class View {
         window.addEventListener("load", () => this.nodes.input.value = "");
         this.nodes.input.addEventListener("focus", () => { if (!this.nodes.input.validity.valueMissing) this.toggleSuggestionBox(true); });
         this.nodes.input.addEventListener("blur", () => { this.toggleSuggestionBox(false); });
-        this.nodes.input.addEventListener("keydown", this.handleSuggestionBoxKeys);
+        this.nodes.search.addEventListener("keydown", this.#handleSuggestionBoxKeys);
+        this.nodes.locations.addEventListener("mouseover", () => { if (this.locationsElements.index != -1) this.#resetSuggestionBox(); });
     }
 
-    handleSuggestionBoxKeys = (event) => {
+    #$ = document.querySelector.bind(document);
+    #$$ = document.querySelectorAll.bind(document);
+    #createElement = document.createElement.bind(document);
+
+    #handleSuggestionBoxKeys = (event) => {
         if (event.key === "ArrowDown" || event.key === "ArrowUp") {
             event.preventDefault();
             this.#selectElement(false);
+            const firstSelectableElementIndex = 0;
+            const lastSelectableElementIndex = this.locationsElements.list.length - 1;
             if (event.key === "ArrowDown") {
-                if (this.locationsElements.index < (this.locationsElements.list.length - 1)) {
-                    this.locationsElements.increaseIndex();
+                this.locationsElements.increaseIndex();
+                if (this.locationsElements.index === this.locationsElements.list.length) {
+                    this.locationsElements.index = firstSelectableElementIndex;
                 }
             } else if (event.key === "ArrowUp") {
-                if (this.locationsElements.index > -1) {
-                    this.locationsElements.decreaseIndex();
+                this.locationsElements.decreaseIndex();
+                if (this.locationsElements.index === -1) {
+                    this.locationsElements.index = lastSelectableElementIndex;
                 }
             }
-            if (this.locationsElements.index !== -1) {
-                return this.#selectElement(true);
+            return this.#selectElement(true);
+        }
+
+        if (event.key === "Escape") {
+            if (this.nodes.locations.classList.contains("hidden")) {
+                return this.nodes.input.value = "";
             } else {
-                this.nodes.input.removeAttribute("aria-activedescendant");
-                return this.#selectElement(false);
+                return this.toggleSuggestionBox(false);
             }
         }
 
-        if (event.key === "Escape" || event.key === "Tab") {
+        if (event.key === "Tab") {
             return this.toggleSuggestionBox(false);
         }
 
@@ -55,12 +67,8 @@ export default class View {
         }
     }
 
-    #$ = document.querySelector.bind(document);
-    #$$ = document.querySelectorAll.bind(document);
-    #createElement = document.createElement.bind(document);
-
     #selectElement(bool) {
-        const currentElement = this.#$(".selected") ?? this.locationsElements.list[this.locationsElements.index];
+        const currentElement = this.#$(".selected") ?? this.locationsElements.list?.[this.locationsElements.index];
         if (currentElement) {
             currentElement.setAttribute("aria-selected", bool);
             if (bool) {
@@ -78,11 +86,13 @@ export default class View {
         this.nodes.locations.scrollTop = 0;
         this.nodes.locations.classList[action]("hidden");
         this.nodes.input.setAttribute("aria-expanded", isExpanded);
-        if (!isExpanded) {
-            this.locationsElements.resetIndex();
-            this.nodes.input.removeAttribute("aria-activedescendant");
-            this.#selectElement(false);
-        }
+        this.#resetSuggestionBox();
+    }
+
+    #resetSuggestionBox() {
+        this.locationsElements.resetIndex();
+        this.nodes.input.removeAttribute("aria-activedescendant");
+        this.#selectElement(false);
     }
 
     printWeather(object) {
