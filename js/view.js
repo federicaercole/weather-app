@@ -28,7 +28,7 @@ export default class View {
     handleSuggestionBoxKeys = (event) => {
         if (event.key === "ArrowDown" || event.key === "ArrowUp") {
             event.preventDefault();
-            this.locationsElements.list.forEach(item => { item.classList.remove("selected"); item.setAttribute("aria-selected", false) })
+            this.#selectElement(false);
             if (event.key === "ArrowDown") {
                 if (this.locationsElements.index < (this.locationsElements.list.length - 1)) {
                     this.locationsElements.increaseIndex();
@@ -39,14 +39,10 @@ export default class View {
                 }
             }
             if (this.locationsElements.index !== -1) {
-                const currentElement = this.locationsElements.list[this.locationsElements.index];
-                this.nodes.input.setAttribute("aria-activedescendant", `${currentElement.id}`)
-                currentElement.setAttribute("aria-selected", true);
-                currentElement.scrollIntoView();
-                return currentElement.classList.add("selected");
+                return this.#selectElement(true);
             } else {
-                this.locationsElements.list.forEach(item => { item.classList.remove("selected"); item.setAttribute("aria-selected", false) })
-                return this.nodes.input.removeAttribute("aria-activedescendant");
+                this.nodes.input.removeAttribute("aria-activedescendant");
+                return this.#selectElement(false);
             }
         }
 
@@ -63,11 +59,30 @@ export default class View {
     #$$ = document.querySelectorAll.bind(document);
     #createElement = document.createElement.bind(document);
 
+    #selectElement(bool) {
+        const currentElement = this.#$(".selected") ?? this.locationsElements.list[this.locationsElements.index];
+        if (currentElement) {
+            currentElement.setAttribute("aria-selected", bool);
+            if (bool) {
+                this.nodes.input.setAttribute("aria-activedescendant", `${currentElement.id}`);
+                currentElement.classList.add("selected");
+                currentElement.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+            } else {
+                currentElement.classList.remove("selected");
+            }
+        }
+    }
+
     toggleSuggestionBox(isExpanded) {
         const action = isExpanded === true ? "remove" : "add";
+        this.nodes.locations.scrollTop = 0;
         this.nodes.locations.classList[action]("hidden");
         this.nodes.input.setAttribute("aria-expanded", isExpanded);
-        this.locationsElements.resetIndex();
+        if (!isExpanded) {
+            this.locationsElements.resetIndex();
+            this.nodes.input.removeAttribute("aria-activedescendant");
+            this.#selectElement(false);
+        }
     }
 
     printWeather(object) {
