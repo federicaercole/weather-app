@@ -12,13 +12,16 @@ function init() {
     view.unitSelectionHandler(toggleUnit);
     view.inputHandler(handleInput);
 
-    function handleInput() {
+    function handleInput(event) {
         clearTimeout(typingTimer);
         if (view.nodes.input.validity.valueMissing) {
             view.nodes.locations.innerHTML = "";
             view.toggleSuggestionBox(false);
         } else {
-            typingTimer = setTimeout(APICall, 500);
+            const keys = ["ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight", "Escape", "Enter", "Tab", "shiftKey"];
+            if (!keys.includes(event.key)) {
+                typingTimer = setTimeout(APICall, 500);
+            }
         }
     }
 
@@ -29,17 +32,19 @@ function init() {
         if (results) {
             view.toggleSuggestionBox(true);
             const liElements = results.map((result) => {
-                const li = view.createResultOption(result, results);
-                li.addEventListener("mousedown", () => {
-                    view.nodes.input.value = result.name;
-                    currentLocation = result;
-                    dataValidation();
-                });
+                const li = view.createResultOption(result, results, () => listElementHandler(result));
                 return li;
             });
             view.nodes.locations.innerHTML = "";
             view.nodes.locations.append(...liElements);
+            view.locationsElements.list = liElements;
         }
+    }
+
+    function listElementHandler(result) {
+        view.nodes.input.value = result.name;
+        currentLocation = result;
+        dataValidation();
     }
 
     function toggleUnit(event) {
