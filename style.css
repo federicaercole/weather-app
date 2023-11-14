@@ -8,6 +8,11 @@
     box-sizing: border-box;
 }
 
+*:focus {
+    outline: 3px solid rgb(251, 130, 1);
+    outline-offset: 2px;
+}
+
 :root {
     --fs-1: 1rem;
     --fs-2: 1.25rem;
@@ -70,11 +75,13 @@ h2 {
 .unit {
     accent-color: rgb(251, 130, 1);
     margin-top: min(2rem, 4vh);
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .unit input[type="radio"] {
-    width: max(24px, 1.5em);
-    height: max(24px, 1.5em);
+    transform: scale(1.5);
 }
 
 .unit label:first-of-type {
@@ -146,9 +153,7 @@ h2 span {
 /*Search*/
 
 .search {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
+    position: relative;
 }
 
 .search input {
@@ -166,16 +171,33 @@ h2 span {
     opacity: 1;
 }
 
-.search button {
-    background-color: transparent;
-    border: transparent;
-    cursor: pointer;
-    fill: white;
-    padding: 12px;
+ul {
+    list-style: none;
+    background-color: rgb(1, 14, 41);
+    border: 1px solid white;
+    max-height: 150px;
+    overflow-y: auto;
+    position: absolute;
+    top: 52px;
+    left: 0;
+    width: 100%;
+    z-index: 2;
 }
 
-.search button:hover {
-    fill: rgb(251, 130, 1);
+li {
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+}
+
+li span {
+    display: block;
+    font-size: var(--fs-1);
+}
+
+li:hover,
+li.selected {
+    background-color: rgb(251, 130, 1);
+    color: rgb(1, 14, 41);
 }
 
 /*Error message and loader*/
