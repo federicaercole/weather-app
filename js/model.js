@@ -39,4 +39,25 @@ export default class Model {
         const response = await fetch(url, { mode: 'cors' });
         return await response.json();
     }
+
+    saveStorageData(location) {
+        const maxNumberOfRecords = 5;
+        if (!localStorage.getItem(`${location.id}`)) {
+            if (localStorage.length === maxNumberOfRecords) {
+                const records = this.createStorageRecordsArray();
+                localStorage.removeItem(`${records[maxNumberOfRecords - 1].id}`);
+            }
+            localStorage.setItem(`${location.id}`, JSON.stringify({ ...location, timestamp: new Date() }));
+        }
+    }
+
+    createStorageRecordsArray() {
+        let records = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            let key = localStorage.key(i);
+            records.push(JSON.parse(localStorage.getItem(key)));
+        }
+        records.sort((a, b) => Number(b.timestamp) - Number(a.timestamp));
+        return records;
+    }
 }

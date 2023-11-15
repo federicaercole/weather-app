@@ -10,31 +10,44 @@ function init() {
     const model = new Model();
 
     view.unitSelectionHandler(toggleUnit);
-    view.inputHandler(handleInput);
+    view.inputKeyHandler(handleInput);
+    view.inputFocusHandler(() => {
+        if (view.nodes.input.validity.valueMissing) {
+            return renderLatestSearchData();
+        } else {
+            return view.toggleSuggestionBox(true);
+        }
+    });
 
     function handleInput(event) {
         clearTimeout(typingTimer);
-        if (view.nodes.input.validity.valueMissing) {
-            view.nodes.locations.innerHTML = "";
-            view.toggleSuggestionBox(false);
-        } else {
-            const keys = ["ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight", "Escape", "Enter", "Tab", "shiftKey"];
-            if (!keys.includes(event.key)) {
+        const keys = ["ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight", "Escape", "Enter", "Tab", "shiftKey"];
+        if (!keys.includes(event.key))
+            if (view.nodes.input.validity.valueMissing) {
+                return renderLatestSearchData();
+            } else {
                 typingTimer = setTimeout(APICall, 500);
             }
-        }
+    }
+
+    function renderLatestSearchData() {
+        const records = model.createStorageRecordsArray();
+        return showSuggestionBoxOptions(records);
     }
 
     async function APICall() {
         const searchData = await model.getSearchResults(view.nodes.input.value);
         const results = searchData.results;
+        return showSuggestionBoxOptions(results);
+    }
 
-        if (results) {
-            view.toggleSuggestionBox(true);
-            const liElements = results.map((result) => {
-                const li = view.createResultOption(result, results, () => listElementHandler(result));
+    function showSuggestionBoxOptions(data) {
+        if (data) {
+            const liElements = data.map((result) => {
+                const li = view.renderResultOption(result, data, () => listElementHandler(result));
                 return li;
             });
+            view.toggleSuggestionBox(true);
             view.nodes.locations.innerHTML = "";
             view.nodes.locations.append(...liElements);
             view.locationsElements.list = liElements;
@@ -70,6 +83,7 @@ function init() {
         try {
             geographicData = model.getGeographicData(currentLocation);
             data = await model.getWeatherData(geographicData, temperatureUnit);
+            model.saveStorageData(currentLocation);
             return view.printWeather(data);
         } catch {
             const error = view.setErrorMsgClass("remove");
