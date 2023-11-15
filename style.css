@@ -67,7 +67,7 @@ h2 {
 }
 
 .hidden {
-    display: none;
+    display: none !important;
 }
 
 /*Temperature unit selection*/
@@ -171,17 +171,43 @@ h2 span {
     opacity: 1;
 }
 
-ul {
-    list-style: none;
+.locations-container h2 {
+    font-size: var(--fs-2);
+    text-align: left;
+    padding: 0.5rem 1rem;
+}
+
+button {
+    background-color: transparent;
+    border: 0;
+    font-family: inherit;
+    color: white;
+    cursor: pointer;
+    margin-right: 1rem;
+    padding: 0 0.5rem;
+    border: 2px solid transparent;
+}
+
+.locations-container>div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.locations-container {
     background-color: rgb(1, 14, 41);
     border: 1px solid white;
-    max-height: 150px;
-    overflow-y: auto;
     position: absolute;
     top: 52px;
     left: 0;
     width: 100%;
     z-index: 2;
+}
+
+ul {
+    list-style: none;
+    max-height: 150px;
+    overflow-y: auto;
 }
 
 li {
@@ -198,6 +224,10 @@ li:hover,
 li.selected {
     background-color: rgb(251, 130, 1);
     color: rgb(1, 14, 41);
+}
+
+button.selected {
+    border: 2px solid rgb(251, 130, 1);
 }
 
 /*Error message and loader*/
@@ -275,7 +305,7 @@ footer a:active {
 
 .fog.night {
     background: rgb(174, 192, 228);
-    background: linear-gradient(0deg, rgba(69, 87, 122, .8) 0%, rgba(15, 66, 97, .8) 100%);
+    background: linear-gradient(0deg, rgba(164, 173, 191, 0.8) 0%, rgba(181, 210, 229, 0.8) 100%);
 }
 
 .light-rain {
@@ -354,8 +384,4 @@ footer a:active {
 
 .cloudy.night .data::before {
     background-image: url("./images/cloud-night.svg");
-}
-
-.fog.night .data::before {
-    background-image: url("./images/fog-night.svg");
 }

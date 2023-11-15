@@ -16,21 +16,28 @@
             <div class="search">
                 <label for="search" class="visually-hidden">Search Input</label>
                 <input type="text" id="search" placeholder="Enter a location name" role="combobox" aria-expanded="false"
-                    aria-owns="locations" aria-autocomplete="list" aria-describedby="assistive-hint" autocomplete="off"
-                    required>
-                <ul id="locations" class="hidden" role="listbox" aria-labelledby="search">
-                </ul>
-                <span id="assistive-hint" class="hidden">When autocomplete results are
-                    available use up and down arrows to review and enter to select. Touch device users, explore by touch
-                    or with swipe gestures.</span>
+                    aria-controls="locations" aria-autocomplete="list" aria-describedby="assistive-hint"
+                    autocomplete="off" required>
+                <div class="locations-container hidden">
+                    <div class="hidden">
+                        <h2>Recent locations</h2>
+                        <button type="button" id="delete" tabindex="-1" aria-label="Delete search history">
+                            <span aria-hidden="true">Delete</span></button>
+                    </div>
+                    <ul id="locations" role="listbox" aria-label="Locations">
+                    </ul>
+                </div>
             </div>
-            <div class="unit">
-                <input id="celsius" type="radio" value="celsius" name="temperature" checked>
-                <label for="celsius">Celsius</label>
-                <input id="fahrenheit" type="radio" value="fahrenheit" name="temperature">
-                <label for="fahrenheit">Fahrenheit</label>
-            </div>
+            <p id="assistive-hint" class="hidden">When autocomplete results are
+                available use up and down arrows to review and enter to select. Touch device users, explore by touch
+                or with swipe gestures.</p>
             <div class="error hidden" aria-live="polite"></div>
+        </div>
+        <div class="unit">
+            <input id="celsius" type="radio" value="celsius" name="temperature" checked>
+            <label for="celsius">Celsius</label>
+            <input id="fahrenheit" type="radio" value="fahrenheit" name="temperature">
+            <label for="fahrenheit">Fahrenheit</label>
         </div>
         <div class="loader hidden"></div>
         <div class="weather-data" aria-live="polite"></div>
