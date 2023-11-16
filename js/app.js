@@ -18,25 +18,33 @@ function init() {
             return view.toggleSuggestionBox(true);
         }
     });
+    view.deleteBtnHandler(model.clearStorageData);
 
     function handleInput(event) {
         clearTimeout(typingTimer);
         const keys = ["ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight", "Escape", "Enter", "Tab", "shiftKey"];
-        if (!keys.includes(event.key))
+        if (!keys.includes(event.key)) {
             if (view.nodes.input.validity.valueMissing) {
                 return renderLatestSearchData();
             } else {
                 typingTimer = setTimeout(APICall, 500);
             }
+        }
     }
 
     function renderLatestSearchData() {
         const records = model.createStorageRecordsArray();
+        if (records.length !== 0) {
+            view.renderRecentLocationsDiv(true);
+        } else {
+            view.renderRecentLocationsDiv(false);
+        }
         return showSuggestionBoxOptions(records);
     }
 
     async function APICall() {
         const searchData = await model.getSearchResults(view.nodes.input.value);
+        view.renderRecentLocationsDiv(false);
         const results = searchData.results;
         return showSuggestionBoxOptions(results);
     }
@@ -44,13 +52,13 @@ function init() {
     function showSuggestionBoxOptions(data) {
         if (data) {
             const liElements = data.map((result) => {
-                const li = view.renderResultOption(result, data, () => listElementHandler(result));
+                const li = view.renderResultOption(result, () => listElementHandler(result));
                 return li;
             });
             view.toggleSuggestionBox(true);
             view.nodes.locations.innerHTML = "";
             view.nodes.locations.append(...liElements);
-            view.locationsElements.list = liElements;
+            view.locationsElements.list = [...view.locationsElements.list, ...liElements];
         }
     }
 
@@ -68,7 +76,7 @@ function init() {
     function dataValidation() {
         view.resetUI();
         if (!currentLocation) {
-            return view.setErrorMsgClass("remove")("Write a location");
+            return view.setErrorMsgClass("remove")("Error: Write a location");
         } else {
             return tryToGetData();
         }
@@ -88,9 +96,9 @@ function init() {
         } catch {
             const error = view.setErrorMsgClass("remove");
             if (!geographicData) {
-                return error("The location doesn't exist or you typed it wrong. Retry");
+                return error("Error: The location doesn't exist or you typed it wrong. Retry");
             } else {
-                return error("Weather is not available!");
+                return error("Error: Weather is not available!");
             }
         } finally {
             view.nodes.loader.classList.add("hidden");

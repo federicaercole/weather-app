@@ -4,7 +4,7 @@ export default class View {
     nodes = {}
 
     locationsElements = {
-        list: null,
+        list: [],
         index: -1,
         increaseIndex() { return this.index++ },
         decreaseIndex() { return this.index-- },
@@ -18,9 +18,11 @@ export default class View {
         this.nodes.search = this.#$(".search");
         this.nodes.input = this.#$('input[type="text"]');
         this.nodes.locations = this.#$("#locations");
+        this.nodes.locationsContainer = this.#$(".locations-container");
+        this.nodes.locationsContainerDiv = this.#$(".locations-container > div");
+        this.nodes.deleteBtn = this.#$(".locations-container button");
         this.nodes.unitSelection = [...this.#$$('input[type="radio"]')];
         window.addEventListener("load", () => this.nodes.input.value = "");
-        this.nodes.input.addEventListener("focus", () => { if (!this.nodes.input.validity.valueMissing) this.toggleSuggestionBox(true); });
         this.nodes.input.addEventListener("blur", () => { this.toggleSuggestionBox(false); });
         this.nodes.search.addEventListener("keydown", this.#handleSuggestionBoxKeys);
         this.nodes.locations.addEventListener("mouseover", () => { if (this.locationsElements.index != -1) this.#resetSuggestionBox(); });
@@ -51,7 +53,7 @@ export default class View {
         }
 
         if (event.key === "Escape") {
-            if (this.nodes.locations.classList.contains("hidden")) {
+            if (this.nodes.locationsContainer.classList.contains("hidden")) {
                 return this.nodes.input.value = "";
             } else {
                 return this.toggleSuggestionBox(false);
@@ -63,12 +65,12 @@ export default class View {
         }
 
         if (event.key === "Enter") {
-            return this.#$(".selected").dispatchEvent(new Event("loadForecast"));
+            if (this.#$(".selected")) return this.#$(".selected").dispatchEvent(new Event("startHandler"));
         }
     }
 
     #selectElement(bool) {
-        const currentElement = this.#$(".selected") ?? this.locationsElements.list?.[this.locationsElements.index];
+        const currentElement = this.#$(".selected") ?? this.locationsElements.list[this.locationsElements.index];
         if (currentElement) {
             currentElement.setAttribute("aria-selected", bool);
             if (bool) {
@@ -84,7 +86,7 @@ export default class View {
     toggleSuggestionBox(isExpanded) {
         const action = isExpanded === true ? "remove" : "add";
         this.nodes.locations.scrollTop = 0;
-        this.nodes.locations.classList[action]("hidden");
+        this.nodes.locationsContainer.classList[action]("hidden");
         this.nodes.input.setAttribute("aria-expanded", isExpanded);
         this.#resetSuggestionBox();
     }
@@ -150,15 +152,30 @@ export default class View {
         return this.#changeWeatherClass(cardNode, weatherCode[index]);
     }
 
-    inputHandler(handler) {
+    inputKeyHandler(handler) {
         return this.nodes.input.addEventListener("keyup", handler);
+    }
+
+    inputFocusHandler(handler) {
+        return this.nodes.input.addEventListener("focus", handler);
+    }
+
+    deleteBtnHandler(handler) {
+        this.nodes.deleteBtn.addEventListener("mousedown", handler);
+        return this.nodes.deleteBtn.addEventListener("startHandler", handler);
     }
 
     unitSelectionHandler(handler) {
         return this.nodes.unitSelection.map(item => item.addEventListener("click", handler));
     }
 
-    createResultOption(item, results, handler) {
+    renderRecentLocationsDiv(bool) {
+        const action = bool === true ? "remove" : "add";
+        this.nodes.locationsContainerDiv.classList[action]("hidden");
+        bool ? this.locationsElements.list = [this.nodes.deleteBtn] : this.locationsElements.list = [];
+    }
+
+    renderResultOption(item, handler) {
         const li = this.#createElement("li");
         li.textContent = `${item.name} - ${item.country}`;
         if (item.admin1) {
@@ -169,10 +186,8 @@ export default class View {
         li.setAttribute("id", `${item.id}`)
         li.setAttribute("role", "option");
         li.setAttribute("aria-selected", "false");
-        li.setAttribute("aria-setsize", `${results.length}`);
-        li.setAttribute("aria-posinset", `${results.indexOf(item) + 1}`);
         li.addEventListener("mousedown", handler);
-        li.addEventListener("loadForecast", handler);
+        li.addEventListener("startHandler", handler);
         return li;
     }
 

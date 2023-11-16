@@ -57,7 +57,11 @@ export default class Model {
             let key = localStorage.key(i);
             records.push(JSON.parse(localStorage.getItem(key)));
         }
-        records.sort((a, b) => Number(b.timestamp) - Number(a.timestamp));
+        records.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
         return records;
+    }
+
+    clearStorageData() {
+        return localStorage.clear();
     }
 }
