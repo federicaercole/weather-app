@@ -95,7 +95,7 @@ h2 {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(400px, 100%), 1fr));
     gap: 1.5rem;
-    width: min(calc(100% - 3rem), 1000px)
+    width: min(calc(100% - 4rem), 1000px);
 }
 
 article {
@@ -160,10 +160,11 @@ h2 span {
     font-family: inherit;
     font-size: inherit;
     background-color: transparent;
-    border: transparent;
+    border: 0;
     border-bottom: 3px solid white;
     padding: 12px 0;
     color: white;
+    border-radius: 0;
 }
 
 ::placeholder {
